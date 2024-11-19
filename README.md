@@ -27,9 +27,16 @@ Structural Patterns you will find:
 Behavioral patterns deal with how objects interact with one another. They define the communication and responsibilities between objects to make their interactions efficient and clear. These patterns help improve the flexibility of your system's workflows.
 
 Behavioral Patterns you will find:
- - Observer 👁️
- - Strategy 📊
+ - Chain of Responsability ⛓️
  - Command 🚴
+ - Interator ➕
+ - Mediator ⚖️
+ - Memento 🎁
+ - Observer 👁️
+ - State ⏯️
+ - Strategy 📊
+ - Template Method 📘
+ - Visitor 🏠
 
  ## Creational Patterns
 Creational patterns focus on the process of creating objects in a flexible and controlled way. They help ensure that object creation is efficient and keeps your code from becoming tightly coupled to specific implementations.
@@ -38,6 +45,8 @@ Creational Patterns:
   - Singleton 🔃
   - Factory Method 🔨
   - Abstract Factory 🤔
+  - Builder 🏛️
+  - Prototype 🤖
 
 > [!IMPORTANT]
 > All patterns have particulary logic and must be used accord with code issue.
