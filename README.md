@@ -13,8 +13,6 @@ Table of Contents: 📖
 # Structural Patterns
 Structural patterns focus on organizing classes and objects in a way that makes it easier to manage relationships and create more efficient and understandable systems. They help ensure that your software's architecture remains flexible and clean.
 
-Structural Patterns you will find:
-
  - Adapter 🩹
  - Facade 🛂
  - Brigde 🌉
@@ -26,7 +24,6 @@ Structural Patterns you will find:
 ## Behavioral Patterns
 Behavioral patterns deal with how objects interact with one another. They define the communication and responsibilities between objects to make their interactions efficient and clear. These patterns help improve the flexibility of your system's workflows.
 
-Behavioral Patterns you will find:
  - Chain of Responsability ⛓️
  - Command 🚴
  - Interator ➕
@@ -41,7 +38,6 @@ Behavioral Patterns you will find:
  ## Creational Patterns
 Creational patterns focus on the process of creating objects in a flexible and controlled way. They help ensure that object creation is efficient and keeps your code from becoming tightly coupled to specific implementations.
 
-Creational Patterns:
   - Singleton 🔃
   - Factory Method 🔨
   - Abstract Factory 🤔
