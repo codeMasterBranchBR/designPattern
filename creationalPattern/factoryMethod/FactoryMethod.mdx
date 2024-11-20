@@ -1,0 +1,169 @@
+# What is the Factory Method Pattern?
+
+The Factory Method is a creational design pattern that provides an interface for creating objects, but allows subclasses to alter the type of objects that will be created. Instead of calling a constructor directly to create an object, the Factory Method allows a class to delegate the instantiation to a subclass. This pattern is particularly useful when the exact type of the object to be created is not known until runtime or when the class should delegate the responsibility of instantiating objects to its subclasses.
+
+# Key Concepts:
+ - Defines a **method**, but the implementation of the **object** creation is deferred to **subclasses**.
+ - Promotes the **open/closed** principle, as **classes** can be extended with new types without modifying the client code.
+ - Decouples object creation from its usage, making the system more flexible and maintainable.
+
+# Problem
+Imagine you have an application that needs to create different types of documents, such as reports and invoices. The exact type of document that needs to be created might depend on the user's choice, and you don’t want to hard-code the object creation process in your application logic.
+
+``` java
+public class Document {
+    public void print() {
+        System.out.println("Printing generic document.");
+    }
+}
+```
+You want a way to create documents without tightly coupling your code to the document creation logic. Here, the Factory Method pattern can help.
+
+# Solution
+Create a base class or interface with a factory method. Then, have different subclasses implement this factory method to create specific types of documents.
+
+``` java
+// Base class
+public abstract class DocumentCreator {
+    // Factory method
+    public abstract Document createDocument();
+}
+
+/* Concrete classes:
+/  Implement the Factory method
+*/
+public class ReportCreator extends DocumentCreator {
+    @Override
+    public Document createDocument() {
+        return new Report();
+    }
+}
+
+public class InvoiceCreator extends DocumentCreator {
+    @Override
+    public Document createDocument() {
+        return new Invoice();
+    }
+}
+
+// Concrete document classes
+public class Report extends Document {
+    @Override
+    public void print() {
+        System.out.println("Printing report document.");
+    }
+}
+
+public class Invoice extends Document {
+    @Override
+    public void print() {
+        System.out.println("Printing invoice document.");
+    }
+}
+```
+```note
+Example:
+
+DocumentCreator is the abstract class or interface with the factory method createDocument().
+ReportCreator and InvoiceCreator are concrete classes that override the factory method to create different types of documents.
+The client can use the creator to instantiate the desired document type, decoupling the creation logic from the rest of the application.
+```
+
+``` java
+public class Client {
+    public static void main(String[] args) {
+        DocumentCreator reportCreator = new ReportCreator();
+        Document report = reportCreator.createDocument();
+        report.print(); // Output: Printing report document.
+
+        DocumentCreator invoiceCreator = new InvoiceCreator();
+        Document invoice = invoiceCreator.createDocument();
+        invoice.print(); // Output: Printing invoice document.
+    }
+}
+```
+
+# Diagram
+
+```mermaid
+
+    class DocumentCreator {
+        +createDocument(): Document
+    }
+    class ReportCreator {
+        +createDocument(): Report
+    }
+    class InvoiceCreator {
+        +createDocument(): Invoice
+    }
+    class Document {
+        +print()
+    }
+    class Report {
+        +print()
+    }
+    class Invoice {
+        +print()
+    }
+
+    DocumentCreator <|-- ReportCreator
+    DocumentCreator <|-- InvoiceCreator
+    ReportCreator --> Report
+    InvoiceCreator --> Invoice
+    Report --> Document
+    Invoice --> Document
+```
+
+# FAQ
+
+## Why use the Factory Method pattern?
+
+Is useful when you need to **create** objects without specifying the exact class of object that will be created.
+It provides a way to delegate the responsibility of object creation to subclasses, allowing for flexibility and extensibility.
+
+## What are the benefits of using the Factory Method pattern?
+
+Decouples object creation: It helps decouple the class that uses the objects from the class that creates them, leading to better maintainability and flexibility.
+Promotes subclassing: It allows subclasses to change the type of objects that are created, making the system more extensible.
+Supports the Open/Closed Principle: You can add new types of objects (i.e., new document types) without modifying existing code.
+
+## What are the disadvantages of using the Factory Method pattern?
+
+Increased complexity: The pattern introduces additional classes and interfaces, which can lead to more complexity in the system.
+Harder to debug: Since the creation of objects is abstracted into a factory method, it can sometimes be harder to trace where and how objects are instantiated, making debugging more challenging.
+
+## How does the Factory Method affect SOLID principles?
+
+Single Responsibility Principle (**SRP**): The Factory Method allows object creation to be separated from business logic, making each class responsible for a single job.
+Open/Closed Principle (**OCP**): The pattern allows the system to be open for extension (new document types) but closed for modification (no need to modify existing code).
+Liskov Substitution Principle (**LSP**): Subclasses that override the factory method can be substituted for their parent class without affecting client code.
+Interface Segregation Principle (**ISP**): The Factory Method can be implemented in smaller, focused interfaces that don't force unnecessary dependencies on the client.
+Dependency Inversion Principle (**DIP**): The pattern allows high-level modules to depend on abstractions (i.e., the factory method), not concrete implementations.
+
+## How easy is it to test the Factory Method pattern?
+
+The Factory Method pattern can make testing easier, as the object creation is abstracted into a factory method. You can mock or stub the factory method in unit tests to test the behavior of the client code without worrying about the actual object creation.
+
+## How can I test the Factory Method pattern?
+
+Mock the Factory Method: In unit tests, you can mock or stub the factory method to return specific types of objects. This allows you to test the client's behavior without relying on the actual creation of the objects.
+
+Example:
+
+```java
+public class DocumentCreatorTest {
+    @Test
+    public void testCreateReportDocument() {
+        DocumentCreator reportCreator = new ReportCreator();
+        Document document = reportCreator.createDocument();
+        assertTrue(document instanceof Report);
+    }
+
+    @Test
+    public void testCreateInvoiceDocument() {
+        DocumentCreator invoiceCreator = new InvoiceCreator();
+        Document document = invoiceCreator.createDocument();
+        assertTrue(document instanceof Invoice);
+    }
+}
+```
