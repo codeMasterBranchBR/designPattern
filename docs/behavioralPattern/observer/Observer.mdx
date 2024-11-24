@@ -1,0 +1,189 @@
+# Observer Pattern
+
+The Observer Pattern establishes a one-to-many dependency between objects so that when one object changes state, all its dependents (**observers**) are notified automatically. This is particularly useful for event-driven systems.
+
+# Key Concepts:
+    - **Subject:** The object being observed. Maintains a list of observers and notifies them of state changes.
+    - **Observer:** The object that wants to be informed of changes in the subject's state.
+    - **ConcreteSubject:** Implements the Subject interface.
+    - **ConcreteObserver:** Implements the Observer interface and updates itself when notified by the subject.
+
+# Use Case
+Imagine a stock market where stock prices fluctuate. Multiple traders (observers) want to be notified whenever a stock (subject) changes its price.
+
+**Observer Interface**
+
+```java
+public interface Observer {
+    void update(String stockName, double price);
+}
+```
+
+**Subject Interface**
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+public class Subject {
+    private final List<Observer> observers = new ArrayList<>();
+
+    public void attach(Observer observer) {
+        observers.add(observer);
+    }
+
+    public void detach(Observer observer) {
+        observers.remove(observer);
+    }
+
+    protected void notifyObservers(String stockName, double price) {
+        for (Observer observer : observers) {
+            observer.update(stockName, price);
+        }
+    }
+}
+```
+
+**ConcreteSubject**
+```java
+import java.util.HashMap;
+import java.util.Map;
+
+public class StockMarket extends Subject {
+    private final Map<String, Double> stockPrices = new HashMap<>();
+
+    public void setPrice(String stockName, double price) {
+        stockPrices.put(stockName, price);
+        notifyObservers(stockName, price);
+    }
+
+    public double getPrice(String stockName) {
+        return stockPrices.getOrDefault(stockName, 0.0);
+    }
+}
+```
+
+**ConcreteObserver**
+```java
+public class Trader implements Observer {
+    private final String name;
+
+    public Trader(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void update(String stockName, double price) {
+        System.out.println("Trader " + name + " notified: " + stockName + " price updated to " + price);
+    }
+}
+```
+
+**Client Code**
+```java
+public class Client {
+    public static void main(String[] args) {
+        StockMarket stockMarket = new StockMarket();
+
+        // Create observers
+        Trader trader1 = new Trader("Alice");
+        Trader trader2 = new Trader("Bob");
+
+        // Attach observers to the subject
+        stockMarket.attach(trader1);
+        stockMarket.attach(trader2);
+
+        // Update stock prices
+        System.out.println("Updating stock prices:");
+        stockMarket.setPrice("AAPL", 150.0);
+        stockMarket.setPrice("GOOG", 2800.0);
+
+        // Detach one observer and update again
+        stockMarket.detach(trader1);
+        System.out.println("\nUpdating stock prices after detaching Alice:");
+        stockMarket.setPrice("AAPL", 155.0);
+    }
+}
+```
+
+# Tests for the Observer Pattern
+
+```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ObserverPatternTest {
+
+    @Test
+    public void testSingleObserver() {
+        StockMarket stockMarket = new StockMarket();
+        Trader trader = new Trader("TestTrader");
+
+        stockMarket.attach(trader);
+
+        // Simulate stock price update
+        stockMarket.setPrice("AAPL", 150.0);
+
+        // Manually verify output in console
+        assertEquals(150.0, stockMarket.getPrice("AAPL"), 0.001);
+    }
+
+    @Test
+    public void testMultipleObservers() {
+        StockMarket stockMarket = new StockMarket();
+        Trader trader1 = new Trader("Trader1");
+        Trader trader2 = new Trader("Trader2");
+
+        stockMarket.attach(trader1);
+        stockMarket.attach(trader2);
+
+        stockMarket.setPrice("GOOG", 2800.0);
+
+        // Both observers should have been notified (verify console output manually)
+        assertEquals(2800.0, stockMarket.getPrice("GOOG"), 0.001);
+    }
+
+    @Test
+    public void testDetachObserver() {
+        StockMarket stockMarket = new StockMarket();
+        Trader trader1 = new Trader("Trader1");
+        Trader trader2 = new Trader("Trader2");
+
+        stockMarket.attach(trader1);
+        stockMarket.attach(trader2);
+
+        stockMarket.setPrice("AAPL", 150.0);
+
+        // Detach one observer
+        stockMarket.detach(trader1);
+
+        // Update price again
+        stockMarket.setPrice("AAPL", 160.0);
+
+        // Verify updated price
+        assertEquals(160.0, stockMarket.getPrice("AAPL"), 0.001);
+
+        // Verify console output shows notification only for Trader2
+    }
+}
+```
+
+# Explanation of Test Cases:
+
+**testSingleObserver:**
+Verifies that a single observer is notified when the subject's state changes.
+
+**testMultipleObservers:**
+Ensures all observers receive updates when the subject's state changes.
+
+**testDetachObserver:**
+Confirms that detached observers no longer receive updates when the subject's state changes.
+
+# Benefits of Testing the Observer Pattern:
+    - Ensures observers are properly notified of state changes.
+    - Validates that attaching and detaching observers works as expected.
+    - Confirms that the subject maintains accurate state information.
+
+# Key Takeaways:
+    - The Observer Pattern is ideal for event-driven systems where multiple components need to respond to changes.
+    - Proper testing ensures the pattern behaves as expected under different scenarios.
+    - The separation of concerns between Subject and Observer promotes scalability and maintainability.

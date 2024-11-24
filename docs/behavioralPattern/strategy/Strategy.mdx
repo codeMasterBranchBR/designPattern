@@ -1,0 +1,165 @@
+# Strategy Pattern
+The Strategy Pattern allows you to define a family of algorithms, encapsulate each one, and make them interchangeable. This pattern lets the algorithm vary independently from the clients that use it.
+
+# Key Concepts:
+    - **Strategy Interface:** Defines a common interface for all supported algorithms.
+    - **Concrete Strategies:** Implement the Strategy interface with different algorithmic logic.
+    - **Context:** Maintains a reference to a Strategy and delegates algorithm execution to it.
+
+# Use Case
+Imagine a payment system where you can pay using different payment methods (e.g., Credit Card, PayPal, Google Pay). Each method has a unique payment process. The Strategy Pattern allows switching between these payment methods dynamically without altering the client code.
+
+**Strategy Interface**
+```java
+public interface PaymentStrategy {
+    void pay(double amount);
+}
+```
+
+**Concrete Strategies**
+```java
+public class CreditCardPayment implements PaymentStrategy {
+    private String cardNumber;
+
+    public CreditCardPayment(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
+    @Override
+    public void pay(double amount) {
+        System.out.println("Paid $" + amount + " using Credit Card: " + cardNumber);
+    }
+}
+
+public class PayPalPayment implements PaymentStrategy {
+    private String email;
+
+    public PayPalPayment(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public void pay(double amount) {
+        System.out.println("Paid $" + amount + " using PayPal account: " + email);
+    }
+}
+
+public class GooglePayPayment implements PaymentStrategy {
+    private String phoneNumber;
+
+    public GooglePayPayment(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    @Override
+    public void pay(double amount) {
+        System.out.println("Paid $" + amount + " using Google Pay with phone number: " + phoneNumber);
+    }
+}
+```
+
+**Context**
+
+```java
+public class PaymentContext {
+    private PaymentStrategy strategy;
+
+    public void setPaymentStrategy(PaymentStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public void pay(double amount) {
+        if (strategy == null) {
+            System.out.println("No payment strategy set!");
+        } else {
+            strategy.pay(amount);
+        }
+    }
+}
+```
+
+**Client Code**
+
+```java
+public class Client {
+    public static void main(String[] args) {
+        PaymentContext paymentContext = new PaymentContext();
+
+        // Use Credit Card payment
+        paymentContext.setPaymentStrategy(new CreditCardPayment("1234-5678-9876-5432"));
+        paymentContext.pay(100.50);
+
+        // Use PayPal payment
+        paymentContext.setPaymentStrategy(new PayPalPayment("user@example.com"));
+        paymentContext.pay(200.75);
+
+        // Use Google Pay payment
+        paymentContext.setPaymentStrategy(new GooglePayPayment("+123456789"));
+        paymentContext.pay(300.25);
+    }
+}
+```
+
+# Tests for the Strategy Pattern
+
+```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class StrategyPatternTest {
+
+    @Test
+    public void testCreditCardPayment() {
+        PaymentContext context = new PaymentContext();
+        context.setPaymentStrategy(new CreditCardPayment("1111-2222-3333-4444"));
+
+        // Simulate payment
+        context.pay(150.0);
+    }
+
+    @Test
+    public void testPayPalPayment() {
+        PaymentContext context = new PaymentContext();
+        context.setPaymentStrategy(new PayPalPayment("test@paypal.com"));
+
+        // Simulate payment
+        context.pay(75.5);
+    }
+
+    @Test
+    public void testGooglePayPayment() {
+        PaymentContext context = new PaymentContext();
+        context.setPaymentStrategy(new GooglePayPayment("+987654321"));
+
+        // Simulate payment
+        context.pay(300.0);
+    }
+
+    @Test
+    public void testNoStrategySet() {
+        PaymentContext context = new PaymentContext();
+
+        // Attempt to pay without a strategy
+        context.pay(50.0);
+    }
+}
+```
+
+# Explanation of Test Cases:
+
+**testCreditCardPayment:**
+Verifies the payment process when using the Credit Card strategy.
+
+**testPayPalPayment:**
+Checks the payment process with the PayPal strategy.
+
+**testGooglePayPayment:**
+Ensures the payment process works with the Google Pay strategy.
+
+**testNoStrategySet:**
+Confirms that the PaymentContext handles the case where no strategy is set.
+
+# Advantages of Strategy Pattern:
+    - Open/Closed Principle: New strategies can be added without modifying the existing code.
+    - Separation of Concerns: Different behaviors (algorithms) are encapsulated in separate classes.
+    - Interchangeability: Strategies can be swapped dynamically at runtime.

@@ -1,0 +1,196 @@
+# State Pattern
+The State Pattern allows an object to alter its behavior when its internal state changes. The object will appear to change its class at runtime.
+
+# Key Concepts:
+    - **State Interface:** Defines the common behavior for all states.
+    - **Concrete States:** Implement the State interface, encapsulating specific behavior for a particular state.
+    - **Context:** Maintains a reference to the current state and delegates state-specific behavior to the current state object.
+
+# Use Case
+Imagine a media player with three states: Playing, Paused, and Stopped. 
+The player behaves differently depending on its state. For example:
+
+    - In the **Playing** state, pressing the "Pause" button transitions it to the Paused state.
+    - In the **Paused** state, pressing "Play" resumes playback.
+    - In the **Stopped** state, pressing "Play" starts playback from the beginning.
+
+
+**State Interface**
+```java
+public interface State {
+    void play(MediaPlayer player);
+    void pause(MediaPlayer player);
+    void stop(MediaPlayer player);
+}
+```
+
+**Concrete States**
+```java
+public class PlayingState implements State {
+    @Override
+    public void play(MediaPlayer player) {
+        System.out.println("Already playing!");
+    }
+
+    @Override
+    public void pause(MediaPlayer player) {
+        System.out.println("Pausing playback...");
+        player.setState(new PausedState());
+    }
+
+    @Override
+    public void stop(MediaPlayer player) {
+        System.out.println("Stopping playback...");
+        player.setState(new StoppedState());
+    }
+}
+
+public class PausedState implements State {
+    @Override
+    public void play(MediaPlayer player) {
+        System.out.println("Resuming playback...");
+        player.setState(new PlayingState());
+    }
+
+    @Override
+    public void pause(MediaPlayer player) {
+        System.out.println("Already paused!");
+    }
+
+    @Override
+    public void stop(MediaPlayer player) {
+        System.out.println("Stopping playback...");
+        player.setState(new StoppedState());
+    }
+}
+
+public class StoppedState implements State {
+    @Override
+    public void play(MediaPlayer player) {
+        System.out.println("Starting playback...");
+        player.setState(new PlayingState());
+    }
+
+    @Override
+    public void pause(MediaPlayer player) {
+        System.out.println("Cannot pause. The media player is stopped.");
+    }
+
+    @Override
+    public void stop(MediaPlayer player) {
+        System.out.println("Already stopped!");
+    }
+}
+```
+
+**Context (MediaPlayer)**
+```java
+public class MediaPlayer {
+    private State currentState;
+
+    public MediaPlayer() {
+        this.currentState = new StoppedState(); // Default state
+    }
+
+    public void setState(State state) {
+        this.currentState = state;
+    }
+
+    public void play() {
+        currentState.play(this);
+    }
+
+    public void pause() {
+        currentState.pause(this);
+    }
+
+    public void stop() {
+        currentState.stop(this);
+    }
+}
+```
+
+**Client Code**
+```java
+public class Client {
+    public static void main(String[] args) {
+        MediaPlayer player = new MediaPlayer();
+
+        // Start playback
+        player.play();
+
+        // Pause playback
+        player.pause();
+
+        // Resume playback
+        player.play();
+
+        // Stop playback
+        player.stop();
+
+        // Try to pause while stopped
+        player.pause();
+    }
+}
+```
+
+# Tests for the State Pattern
+
+```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class StatePatternTest {
+
+    @Test
+    public void testInitialStoppedState() {
+        MediaPlayer player = new MediaPlayer();
+
+        // Verify initial state behavior
+        player.pause(); // Cannot pause
+        player.play();  // Starts playback
+    }
+
+    @Test
+    public void testTransitionToPlayingState() {
+        MediaPlayer player = new MediaPlayer();
+
+        player.play();
+        player.pause();
+
+        // Verify behavior in paused state
+        player.play(); // Resumes playback
+        player.stop(); // Stops playback
+    }
+
+    @Test
+    public void testInvalidStateTransitions() {
+        MediaPlayer player = new MediaPlayer();
+
+        // Invalid transitions
+        player.pause(); // Cannot pause
+        player.stop();  // Already stopped
+
+        // Transition to playing and stop again
+        player.play();
+        player.stop();
+        player.stop(); // Already stopped
+    }
+}
+```
+
+# Explanation of Test Cases:
+
+**testInitialStoppedState:**
+Ensures the MediaPlayer starts in the Stopped state and behaves correctly.
+
+**testTransitionToPlayingState:**
+Verifies state transitions from Stopped → Playing → Paused and back to Playing.
+
+**testInvalidStateTransitions:**
+Confirms that invalid transitions (e.g., pausing while stopped) are handled appropriately.
+
+# Key Takeaways:
+    - The State Pattern simplifies complex state-dependent behavior by encapsulating each state's logic in separate classes.
+    - Adding new states or modifying existing ones is easy and does not require changes to the context or other states.
+    - Testing the State Pattern ensures proper state transitions and adherence to expected behavior.

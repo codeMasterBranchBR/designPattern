@@ -1,0 +1,149 @@
+# Template Method Pattern
+The Template Method Pattern defines the skeleton of an algorithm in a base class and allows subclasses to implement specific steps of the algorithm without changing its structure.
+
+# Key Concepts:
+    - **Abstract Class:** Contains the template method and abstract methods for steps that need customization.
+    - **Concrete Subclasses:** Implement the specific steps defined as abstract in the base class.
+    - **Template Method:** A non-overridable method that defines the order of steps in the algorithm.
+
+# Use Case
+Imagine a system that processes orders for Online Shopping. The processing steps are similar but vary slightly for Standard Orders, Gift Orders, and Bulk Orders. The Template Method Pattern ensures that the order processing follows the same structure while allowing variations in specific steps.
+
+**Abstract Class**
+
+```java
+public abstract class OrderProcessor {
+    // Template method
+    public final void processOrder() {
+        selectItems();
+        applyDiscount();
+        doPayment();
+        deliverItems();
+    }
+
+    protected abstract void selectItems();
+    protected abstract void applyDiscount();
+    protected abstract void doPayment();
+    protected abstract void deliverItems();
+}
+```
+
+**Concrete Subclasses**
+
+```java
+public class StandardOrderProcessor extends OrderProcessor {
+    @Override
+    protected void selectItems() {
+        System.out.println("StandardOrder: Selecting items from the catalog.");
+    }
+
+    @Override
+    protected void applyDiscount() {
+        System.out.println("StandardOrder: Applying no discounts.");
+    }
+
+    @Override
+    protected void doPayment() {
+        System.out.println("StandardOrder: Processing payment through a credit card.");
+    }
+
+    @Override
+    protected void deliverItems() {
+        System.out.println("StandardOrder: Delivering items via standard shipping.");
+    }
+}
+
+public class GiftOrderProcessor extends OrderProcessor {
+    @Override
+    protected void selectItems() {
+        System.out.println("GiftOrder: Selecting gift items from the gift shop.");
+    }
+
+    @Override
+    protected void applyDiscount() {
+        System.out.println("GiftOrder: Applying a 10% gift discount.");
+    }
+
+    @Override
+    protected void doPayment() {
+        System.out.println("GiftOrder: Processing payment through PayPal.");
+    }
+
+    @Override
+    protected void deliverItems() {
+        System.out.println("GiftOrder: Delivering items with gift wrapping.");
+    }
+}
+
+public class BulkOrderProcessor extends OrderProcessor {
+    @Override
+    protected void selectItems() {
+        System.out.println("BulkOrder: Selecting items from the bulk warehouse.");
+    }
+
+    @Override
+    protected void applyDiscount() {
+        System.out.println("BulkOrder: Applying a 20% bulk discount.");
+    }
+
+    @Override
+    protected void doPayment() {
+        System.out.println("BulkOrder: Processing payment through corporate account.");
+    }
+
+    @Override
+    protected void deliverItems() {
+        System.out.println("BulkOrder: Delivering items via freight shipping.");
+    }
+}
+```
+
+**Client Code**
+
+```java
+public class Client {
+    public static void main(String[] args) {
+        System.out.println("Processing Standard Order:");
+        OrderProcessor standardOrder = new StandardOrderProcessor();
+        standardOrder.processOrder();
+
+        System.out.println("\nProcessing Gift Order:");
+        OrderProcessor giftOrder = new GiftOrderProcessor();
+        giftOrder.processOrder();
+
+        System.out.println("\nProcessing Bulk Order:");
+        OrderProcessor bulkOrder = new BulkOrderProcessor();
+        bulkOrder.processOrder();
+    }
+}
+```
+
+# Tests for the Template Method Pattern
+
+```java
+import org.junit.Test;
+
+public class TemplateMethodPatternTest {
+
+    @Test
+    public void testStandardOrderProcessing() {
+        OrderProcessor standardOrder = new StandardOrderProcessor();
+        standardOrder.processOrder();
+        // Validate steps specific to standard order processing
+    }
+
+    @Test
+    public void testGiftOrderProcessing() {
+        OrderProcessor giftOrder = new GiftOrderProcessor();
+        giftOrder.processOrder();
+        // Validate steps specific to gift order processing
+    }
+
+    @Test
+    public void testBulkOrderProcessing() {
+        OrderProcessor bulkOrder = new BulkOrderProcessor();
+        bulkOrder.processOrder();
+        // Validate steps specific to bulk order processing
+    }
+}
+```
