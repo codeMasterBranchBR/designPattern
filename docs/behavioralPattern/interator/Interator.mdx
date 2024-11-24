@@ -1,0 +1,179 @@
+# Iterator Pattern
+The Iterator Pattern allows sequential access to elements of a collection without exposing its underlying representation. This is especially useful for traversing collections with different implementations.
+
+# Key Concepts:
+    - **Iterator Interface:** Defines methods for accessing elements (hasNext, next, etc.).
+    - **Concrete Iterator:** Implements the iterator interface for a specific collection type.
+    - **Aggregate Interface:** Defines a method for creating an iterator.
+    - **Concrete Aggregate:** Implements the aggregate interface and provides the actual collection to iterate over.
+
+# Use Case
+
+Imagine a music playlist system where you want to iterate through songs in a playlist sequentially without exposing the internal implementation of the playlist.
+
+# Implementation
+
+**Iterator Interface**
+
+```java
+public interface Iterator<T> {
+    boolean hasNext();
+    T next();
+}
+```
+
+**Aggregate Interface**
+
+```java
+public interface IterableCollection<T> {
+    Iterator<T> createIterator();
+}
+```
+
+**Concrete Iterator**
+
+```java
+public class PlaylistIterator implements Iterator<String> {
+    private final String[] songs;
+    private int position;
+
+    public PlaylistIterator(String[] songs) {
+        this.songs = songs;
+        this.position = 0;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return position < songs.length;
+    }
+
+    @Override
+    public String next() {
+        if (!hasNext()) {
+            throw new IllegalStateException("No more songs in the playlist.");
+        }
+        return songs[position++];
+    }
+}
+```
+
+**Concrete Aggregate**
+
+```java
+public class Playlist implements IterableCollection<String> {
+    private final String[] songs;
+
+    public Playlist(String[] songs) {
+        this.songs = songs;
+    }
+
+    @Override
+    public Iterator<String> createIterator() {
+        return new PlaylistIterator(songs);
+    }
+}
+```
+
+# Client Code
+
+```java
+public class Client {
+    public static void main(String[] args) {
+        // Create a playlist
+        Playlist playlist = new Playlist(new String[]{"Song A", "Song B", "Song C"});
+
+        // Create an iterator
+        Iterator<String> iterator = playlist.createIterator();
+
+        // Traverse the playlist
+        while (iterator.hasNext()) {
+            System.out.println("Now playing: " + iterator.next());
+        }
+    }
+}
+```
+
+# Tests for the Iterator Pattern
+
+```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class IteratorPatternTest {
+
+    @Test
+    public void testSingleIteratorTraversal() {
+        Playlist playlist = new Playlist(new String[]{"Song A", "Song B", "Song C"});
+        Iterator<String> iterator = playlist.createIterator();
+
+        assertTrue(iterator.hasNext());
+        assertEquals("Song A", iterator.next());
+
+        assertTrue(iterator.hasNext());
+        assertEquals("Song B", iterator.next());
+
+        assertTrue(iterator.hasNext());
+        assertEquals("Song C", iterator.next());
+
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void testEmptyPlaylist() {
+        Playlist playlist = new Playlist(new String[]{});
+        Iterator<String> iterator = playlist.createIterator();
+
+        assertFalse(iterator.hasNext());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testIteratorThrowsExceptionWhenNoMoreElements() {
+        Playlist playlist = new Playlist(new String[]{"Song A"});
+        Iterator<String> iterator = playlist.createIterator();
+
+        iterator.next(); // Song A
+        iterator.next(); // This should throw an exception
+    }
+
+    @Test
+    public void testMultipleIterators() {
+        Playlist playlist = new Playlist(new String[]{"Song A", "Song B"});
+        Iterator<String> iterator1 = playlist.createIterator();
+        Iterator<String> iterator2 = playlist.createIterator();
+
+        assertTrue(iterator1.hasNext());
+        assertEquals("Song A", iterator1.next());
+
+        assertTrue(iterator2.hasNext());
+        assertEquals("Song A", iterator2.next()); // Independent traversal
+
+        assertTrue(iterator1.hasNext());
+        assertEquals("Song B", iterator1.next());
+
+        assertTrue(iterator2.hasNext());
+        assertEquals("Song B", iterator2.next());
+
+        assertFalse(iterator1.hasNext());
+        assertFalse(iterator2.hasNext());
+    }
+}
+```
+
+## Explanation of Test Cases:
+
+**testSingleIteratorTraversal:**
+Validates that an iterator can traverse a playlist and retrieve all elements sequentially.
+
+**testEmptyPlaylist:**
+Ensures an iterator over an empty collection behaves correctly by returning false for hasNext().
+
+**testIteratorThrowsExceptionWhenNoMoreElements:**
+Verifies that calling next() on an iterator with no remaining elements throws an exception.
+
+**testMultipleIterators:**
+Confirms that multiple iterators can operate independently on the same collection.
+
+# Benefits of Testing the Iterator Pattern
+    - Tests ensure that collection traversal works regardless of the underlying structure.
+    - Verifies edge cases like empty collections and concurrent usage of multiple iterators.
+    - Promotes adherence to the contract defined by the **Iterator interface**.

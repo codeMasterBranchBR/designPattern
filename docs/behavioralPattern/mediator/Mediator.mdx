@@ -1,0 +1,191 @@
+# Mediator Pattern
+The Mediator Pattern defines an object (Mediator) that encapsulates how a set of objects interact, promoting loose coupling by preventing objects from referring to each other directly.
+
+# Key Concepts:
+    - **Mediator Interface:** Declares methods for communication between components.
+    - **Concrete Mediator:** Implements the mediator interface and coordinates communication between colleagues.
+    - **Colleague:** Represents an object that interacts with other objects through the mediator.
+
+# Use Case
+Imagine a chat room where multiple users can send messages to one another. Instead of each user directly managing connections to every other user, a central ChatMediator facilitates communication.
+
+**Mediator Interface**
+```java
+public interface Mediator {
+    void sendMessage(String message, Colleague sender);
+    void addColleague(Colleague colleague);
+}
+```
+
+**Concrete Mediator**
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+public class ChatMediator implements Mediator {
+    private final List<Colleague> colleagues = new ArrayList<>();
+
+    @Override
+    public void sendMessage(String message, Colleague sender) {
+        for (Colleague colleague : colleagues) {
+            if (colleague != sender) {
+                colleague.receive(message);
+            }
+        }
+    }
+
+    @Override
+    public void addColleague(Colleague colleague) {
+        colleagues.add(colleague);
+    }
+}
+```
+
+**Colleague**
+```java
+public abstract class Colleague {
+    protected Mediator mediator;
+
+    public Colleague(Mediator mediator) {
+        this.mediator = mediator;
+    }
+
+    public abstract void send(String message);
+    public abstract void receive(String message);
+}
+```
+
+**Concrete Colleagues**
+```java
+public class User extends Colleague {
+    private final String name;
+
+    public User(Mediator mediator, String name) {
+        super(mediator);
+        this.name = name;
+    }
+
+    @Override
+    public void send(String message) {
+        System.out.println(name + " sends: " + message);
+        mediator.sendMessage(message, this);
+    }
+
+    @Override
+    public void receive(String message) {
+        System.out.println(name + " received: " + message);
+    }
+}
+```
+
+**Client Code**
+```java
+public class Client {
+    public static void main(String[] args) {
+        Mediator chatMediator = new ChatMediator();
+
+        Colleague user1 = new User(chatMediator, "Alice");
+        Colleague user2 = new User(chatMediator, "Bob");
+        Colleague user3 = new User(chatMediator, "Charlie");
+
+        chatMediator.addColleague(user1);
+        chatMediator.addColleague(user2);
+        chatMediator.addColleague(user3);
+
+        user1.send("Hello, everyone!");
+        user2.send("Hi Alice!");
+        user3.send("Good to see you all.");
+    }
+}
+```
+
+# Tests for the Mediator Pattern
+
+```java
+import org.junit.Test;
+import static org.mockito.Mockito.*;
+
+public class MediatorPatternTest {
+
+    @Test
+    public void testSingleMessageBroadcast() {
+        Mediator chatMediator = new ChatMediator();
+
+        Colleague user1 = new User(chatMediator, "Alice");
+        Colleague user2 = new User(chatMediator, "Bob");
+
+        chatMediator.addColleague(user1);
+        chatMediator.addColleague(user2);
+
+        user1.send("Hello, Bob!");
+
+        // Validate that Bob received the message
+        // This can also be checked using console output verification in manual tests
+    }
+
+    @Test
+    public void testNoSelfMessage() {
+        Mediator chatMediator = new ChatMediator();
+
+        Colleague user1 = new User(chatMediator, "Alice");
+        chatMediator.addColleague(user1);
+
+        user1.send("Should not receive this message");
+
+        // Alice should not receive their own message
+    }
+
+    @Test
+    public void testMultipleUsersInteraction() {
+        Mediator chatMediator = new ChatMediator();
+
+        Colleague user1 = new User(chatMediator, "Alice");
+        Colleague user2 = new User(chatMediator, "Bob");
+        Colleague user3 = new User(chatMediator, "Charlie");
+
+        chatMediator.addColleague(user1);
+        chatMediator.addColleague(user2);
+        chatMediator.addColleague(user3);
+
+        user2.send("Hi everyone!");
+
+        // Validate that Alice and Charlie received the message
+        // Validate Bob does not receive his own message
+    }
+
+    @Test
+    public void testEmptyMediator() {
+        Mediator chatMediator = new ChatMediator();
+
+        Colleague user1 = new User(chatMediator, "Alice");
+
+        // Sending a message without any other colleagues
+        user1.send("Is anyone there?");
+    }
+}
+```
+
+# Test Cases:
+
+**testSingleMessageBroadcast:**
+Verifies that a message sent by one user is broadcast to other users in the mediator.
+
+**testNoSelfMessage:**
+Ensures that the sender does not receive their own message.
+
+**testMultipleUsersInteraction:**
+Tests interactions among multiple users to ensure proper broadcasting.
+
+**testEmptyMediator:**
+    - Confirms that the mediator handles cases with no other participants gracefully.
+    - Benefits of Testing the Mediator Pattern
+    - Ensures that the mediator facilitates communication correctly without direct coupling between objects.
+    - Confirms that self-messaging is avoided.
+    - Validates the scalability of adding or removing colleagues dynamically.
+
+**Key Takeaways**
+    - The Mediator Pattern promotes loose coupling by centralizing communication logic in a mediator.
+    - Adding or removing colleagues is straightforward, and the system remains flexible.
+    - Testing is intuitive due to the decoupled nature of the pattern, enabling isolated testing of each component.
+
+

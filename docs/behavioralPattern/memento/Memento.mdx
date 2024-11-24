@@ -1,0 +1,189 @@
+# Memento Pattern
+The Memento Pattern is used to capture and restore an object's internal state without exposing its implementation details. This is particularly useful for undo mechanisms.
+
+# Key Concepts:
+    - **Originator:** The object whose state needs to be saved and restored.
+    - **Memento:** A representation of the state of the originator.
+    - **Caretaker:** Manages the mementos and handles saving and restoring states.
+ 
+# Use Case
+Imagine a text editor where users can type text and undo their actions. Using the Memento Pattern, we can save the state of the editor at various points and revert to previous states when needed.
+
+**Memento**
+```java
+public class Memento {
+    private final String state;
+
+    public Memento(String state) {
+        this.state = state;
+    }
+
+    public String getState() {
+        return state;
+    }
+}
+```
+
+**Originator**
+```java
+public class TextEditor {
+    private String content;
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public Memento save() {
+        return new Memento(content);
+    }
+
+    public void restore(Memento memento) {
+        this.content = memento.getState();
+    }
+}
+```
+
+**Caretaker**
+```java
+import java.util.Stack;
+
+public class Caretaker {
+    private final Stack<Memento> history = new Stack<>();
+
+    public void saveState(Memento memento) {
+        history.push(memento);
+    }
+
+    public Memento undo() {
+        if (!history.isEmpty()) {
+            return history.pop();
+        }
+        return null;
+    }
+}
+```
+
+**Client Code**
+```java
+public class Client {
+    public static void main(String[] args) {
+        TextEditor editor = new TextEditor();
+        Caretaker caretaker = new Caretaker();
+
+        // Initial state
+        editor.setContent("Hello, World!");
+        System.out.println("Initial Content: " + editor.getContent());
+        caretaker.saveState(editor.save());
+
+        // Change state
+        editor.setContent("Hello, Java!");
+        System.out.println("Updated Content: " + editor.getContent());
+        caretaker.saveState(editor.save());
+
+        // Another change
+        editor.setContent("Hello, Design Patterns!");
+        System.out.println("Latest Content: " + editor.getContent());
+
+        // Undo last change
+        editor.restore(caretaker.undo());
+        System.out.println("After Undo: " + editor.getContent());
+
+        // Undo another change
+        editor.restore(caretaker.undo());
+        System.out.println("After Another Undo: " + editor.getContent());
+    }
+}
+```
+
+# Tests Case
+
+```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class MementoPatternTest {
+
+    @Test
+    public void testSaveAndRestoreState() {
+        TextEditor editor = new TextEditor();
+        Caretaker caretaker = new Caretaker();
+
+        editor.setContent("State 1");
+        caretaker.saveState(editor.save());
+
+        editor.setContent("State 2");
+        caretaker.saveState(editor.save());
+
+        editor.setContent("State 3");
+
+        // Restore to previous state
+        editor.restore(caretaker.undo());
+        assertEquals("State 2", editor.getContent());
+
+        // Restore to initial state
+        editor.restore(caretaker.undo());
+        assertEquals("State 1", editor.getContent());
+    }
+
+    @Test
+    public void testUndoWithoutHistory() {
+        TextEditor editor = new TextEditor();
+        Caretaker caretaker = new Caretaker();
+
+        editor.setContent("State 1");
+
+        // Try to undo without saving
+        Memento memento = caretaker.undo();
+        assertNull(memento);
+    }
+
+    @Test
+    public void testMultipleUndo() {
+        TextEditor editor = new TextEditor();
+        Caretaker caretaker = new Caretaker();
+
+        editor.setContent("State 1");
+        caretaker.saveState(editor.save());
+
+        editor.setContent("State 2");
+        caretaker.saveState(editor.save());
+
+        editor.setContent("State 3");
+        caretaker.saveState(editor.save());
+
+        // Perform multiple undos
+        editor.restore(caretaker.undo());
+        assertEquals("State 2", editor.getContent());
+
+        editor.restore(caretaker.undo());
+        assertEquals("State 1", editor.getContent());
+
+        // No more states to undo
+        Memento memento = caretaker.undo();
+        assertNull(memento);
+    }
+}
+```
+
+# Explanation of Test Cases:
+
+**testSaveAndRestoreState:**
+Verifies that states can be saved and restored sequentially.
+
+**testUndoWithoutHistory:**
+Confirms that attempting to undo without any saved states returns null or has no effect.
+
+**testMultipleUndo:**
+    - Ensures multiple undos work as expected and gracefully handle reaching the beginning of the history.
+    - Benefits of Testing the Memento Pattern:
+    - Validates that states are correctly saved and restored.
+    - Ensures that the Caretaker properly manages the history of mementos.
+    - Confirms behavior when there are no states to restore.
+# Key Takeaways:
+    - The Memento Pattern is ideal for scenarios requiring undo/redo functionality.
+    - By separating concerns, the Originator focuses on its logic, while the Caretaker manages the history of states.
+    - Testing ensures the robustness of saving and restoring states under various conditions.
